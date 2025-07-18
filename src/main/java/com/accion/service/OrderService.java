@@ -9,6 +9,7 @@ import com.accion.model.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,6 +28,8 @@ public class OrderService {
     @Autowired
     private ItemService itemService;
 
+    private static final double extraDiscount = 5.0;
+
     public UUID createOrder(Order order) {
         // we will create an order here.
         // call order service to create order
@@ -34,12 +37,18 @@ public class OrderService {
 
     public DecoratedOrder getOrderDetails(UUID orderId) {
         Optional<Order> order = orderRepository.findById(orderId);
-        DecoratedOrder decOrder = (DecoratedOrder) order.get();
+        if (order.isPresent()) {
+            DecoratedOrder decOrder = (DecoratedOrder) order.get();
+            List<DecoratedItem> orderItems = itemService.getDecoratedItems(orderId);
+            decOrder.decoratedItems = orderItems;
+            LocalDateTime date = LocalDateTime.now();
+            if (date.getDayOfMonth() == 10) {
+                decOrder.extraDiscount = extraDiscount;
+            }
+            return decOrder;
+        }
 
-        List<DecoratedItem> orderItems = itemService.getDecoratedItems(orderId);
-        decOrder.decoratedItems = orderItems;
-
-        return decOrder;
+        return null;
     }
 
 }

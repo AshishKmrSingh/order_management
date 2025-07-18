@@ -1,8 +1,12 @@
 package com.accion.service;
 
+import com.accion.controller.ExtraDiscountController;
 import com.accion.dao.ItemRepository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,12 +30,20 @@ public class ItemService {
     @Autowired
     private ItemDecorator itemDecorator;
 
+    private static final double extraDiscount = 5.0;
+
     public List<DecoratedItem> getDecoratedItems(UUID orderid) {
         List<Item> items = itemRepository.getItems(orderid);
         List<DecoratedItem> decoratedItems = new ArrayList<>();
 
         for(Item item: items) {
             DecoratedItem decItem = itemDecorator.getDecorateditem(item);
+
+            LocalDateTime date = LocalDateTime.now();
+            if (date.getDayOfMonth() == 10) {
+                decItem.priceApplied = decItem.priceApplied - ((extraDiscount * decItem.priceApplied) / 100);
+                decItem.discountApplied = extraDiscount;
+            }
             decoratedItems.add(decItem);
         }
 
